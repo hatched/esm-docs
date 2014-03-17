@@ -1,4 +1,4 @@
-# Environment State Model
+# Environment Change Model
 
 The purpose of this document is to outline the feature requirements and implementation details of an environment state model to be used to track changes in the environment such as deploying services, modifying service settings, scaling services, etc.
 
@@ -17,31 +17,38 @@ The purpose of this document is to outline the feature requirements and implemen
 
 ## Implementation
 
-Every environment will have a single instantiation of the ESM. Changes to that environment will interact directly with the ESM instead of calling to the environment, as it currently does, to add to the state change queue. When requested the ESM will be able to output an object structure which will be parsed and converted into Juju environment calls.
+Every environment will have a single instantiation of the ESM. Changes to that environment will interact directly with the ECM instead of calling to the environment, as it currently does, to add to the state change queue. When requested the ESM will be able to output an object structure which will be parsed and converted into Juju environment calls.
 
-The ESM provides a set of convenience methods on top of a persistent data store library (currently a POJI) who's responsibility it is to store and modify the deltas sent by the ESM.
+The ECM provides a set of convenience methods on top of a persistent data store library (currently a POJI) who's responsibility it is to store and modify the deltas sent by the ESM.
 
 ### API
 All methods have two parameters, config and options. The structure of the config parameter matches the appropriate method in the environment. The options paramater are for options related to the ESM instance such as the 'immediate' boolean property which executes the command immediately without adding it to the queue.
 
 #### Constructor
-`EnvironmentStateModel(config Object) instance Object`
+`EnvironmenChangeModel(config Object) instance Object`
 
 #### Command syntax
+Can we compare old call/updated call here? I feel like this call should be more of a change.request('addService', config, options)?
+
 `deploy(config Object, options Object) id Int`
 
 #### Convenience methods
+meh, why not just list()? Any reason to specify the queue part?
+
 `queueList() list Array`
 
+Same here.
 `queueListOverview() list Array`
+
 
 `remove(tmpId String) record Object`
 
 #### Queue Example
 ```javascript
-var esm = new EnvironmentStateModel();
+var esm = new EnvironmentChangeModel();
 
-var tmpServiceId = esm.deploy({
+
+var tmpServiceId = ecm.add({
   charmUrl: '',
   serviceName: '',
   config: {},
@@ -64,6 +71,8 @@ esm.setConfig({
   immediate: true
 })
 ```
+
+ecm.deploy(); // to commit the changes?
 
 ### Code
 ```javascript
